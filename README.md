@@ -9,11 +9,11 @@ Helps to remove `ssh` keys from an `authorized_keys` file for a given user based
 ```
 Usage:
 
-    remove_user_keys <github_username>
+    % remove_user_keys <github_username>
 
 Or, if you want to specify the authorzied_keys file
 
-    authorized_keys=/path/to/file remove_user_keys <github_username>
+    % authorized_keys=/path/to/file remove_user_keys <github_username>
 
 ```
 
@@ -23,10 +23,10 @@ Quick script to add `ssh` keys to an `authorized_keys` file for a given user bas
 ```
 Usage:
 
-    add_user_keys <github_username>
+    % add_user_keys <github_username>
 
 Or, if you want to specify the authorzied_keys file
 
-    authorized_keys=/path/to/file add_user_keys <github_username>
+    % authorized_keys=/path/to/file add_user_keys <github_username>
 
 ```
