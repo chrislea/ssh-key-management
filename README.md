@@ -6,7 +6,7 @@ A basic repository of script / utilities to help with `ssh` key management.
 
 Helps to remove `ssh` keys from an `authorized_keys` file for a given user based on the public keys that user has listed on [GitHub](https://github.com).
 
-```bash
+```
 Usage:
 
     remove_user_keys <github_username>
