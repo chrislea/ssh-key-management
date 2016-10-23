@@ -1,0 +1,43 @@
+#!/bin/bash -e
+
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+authorized_keys=${authorized_keys:-"${HOME}/.ssh/authorized_keys"}
+user_to_add=${1}
+script_name=${0##*/}
+
+#------------------------------------------------------------
+# Generic usage function
+#------------------------------------------------------------
+function usage {
+    echo ""
+    echo "Usage:"
+    echo ""
+    echo "    ${script_name} <github_username>"
+    echo ""
+    echo "Or, if you want to specify the authorzied_keys file"
+    echo ""
+    echo "    authorized_keys=/path/to/file ${script_name} <github_username>"
+    echo ""
+}
+
+#------------------------------------------------------------
+# Check that we can write to authorized_keys
+#------------------------------------------------------------
+[ -w ${authorized_keys} ] || { echo >&2 "I can't write to ${authorized_keys}... exiting..."; usage; exit 1; }
+
+#------------------------------------------------------------
+# Check that we have curl
+#------------------------------------------------------------
+command -v curl >/dev/null 2>&1 || { echo >&2 "I require curl but it's not installed... exiting..."; usage; exit 2; }
+
+#------------------------------------------------------------
+# Check that we have a possible user whose keys we care about
+#------------------------------------------------------------
+[ ${#} -ne 1 ] && { echo >&2 "Need exactly one argument, the GitHub username... exiting..."; usage; exit 3; }
+
+#------------------------------------------------------------
+# Grab the keys from GitHub and append them
+#------------------------------------------------------------
+curl -s https://github.com/${user_to_add}.keys >> ${authorized_keys}
+
+exit 0
