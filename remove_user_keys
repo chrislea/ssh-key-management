@@ -1,0 +1,61 @@
+#!/bin/bash -e
+
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+authorized_keys=${authorized_keys:-"${HOME}/.ssh/authorized_keys"}
+user_to_delete=${1}
+script_name=${0##*/}
+
+#------------------------------------------------------------
+# Generic usage function
+#------------------------------------------------------------
+function usage {
+    echo ""
+    echo "Usage:"
+    echo ""
+    echo "    ${script_name} <github_username>"
+    echo ""
+    echo "Or, if you want to specify the authorzied_keys file"
+    echo ""
+    echo "    authorized_keys=/path/to/file ${script_name} <github_username>"
+    echo ""
+}
+
+#------------------------------------------------------------
+# Check that we can write to authorized_keys
+#------------------------------------------------------------
+[ -w ${authorized_keys} ] || { echo >&2 "I can't write to ${authorized_keys}... exiting..."; usage; exit 1; }
+
+#------------------------------------------------------------
+# Check that we have curl
+#------------------------------------------------------------
+command -v curl >/dev/null 2>&1 || { echo >&2 "I require curl but it's not installed... exiting..."; usage; exit 2; }
+
+#------------------------------------------------------------
+# Check that we have a possible user whose keys we care about
+#------------------------------------------------------------
+[ ${#} -ne 1 ] && { echo >&2 "Need exactly one argument, the GitHub username... exiting..."; usage; exit 3; }
+
+#------------------------------------------------------------
+# Make a temp file with the keys in question in it
+#------------------------------------------------------------
+keys_file=$(mktemp /tmp/gh_${user_to_delete}_keys.XXXXXXXXXXXX)
+curl -s https://github.com/${user_to_delete}.keys > ${keys_file}
+
+#------------------------------------------------------------
+# Read through user keys, grep them out of authorized_keys
+#------------------------------------------------------------
+while read ssh_key
+do
+    grepped_file=$(mktemp /tmp/gh_cleared.XXXXXXXXXXXX)
+    grep -v "${ssh_key}" ${authorized_keys} > ${grepped_file}
+    cp -f ${grepped_file} ${authorized_keys}
+    rm -f ${grepped_file}
+done < ${keys_file}
+
+#------------------------------------------------------------
+# Clean up after ourselves...
+#------------------------------------------------------------
+rm -f ${keys_file}
+chmod 600 ${authorized_keys}
+
+exit 0
